@@ -19,6 +19,7 @@ import typer
 from flakectl import __version__
 from flakectl.agent import DEFAULT_MIN_CONFIDENCE
 from flakectl.detector import HistoryError, RerunHistory
+from flakectl.evaluate import LabelError, evaluate, format_report, load_labels
 from flakectl.fingerprint import fingerprint_failure
 from flakectl.junit import JUnitParseError
 from flakectl.parser import DEFAULT_BYTE_CAP
@@ -249,6 +250,50 @@ def report(
         typer.echo(f"Wrote {out} ({len(markdown.splitlines())} lines, dry run).")
     else:
         typer.echo(markdown)
+
+
+@app.command()
+def eval(
+    labels: Annotated[str, typer.Option(help="JSONL corpus of hand-labelled failures.")] = (
+        "eval/labels.jsonl"
+    ),
+    offline: Annotated[
+        bool, typer.Option("--offline/--online", help="Score the deterministic ruleset.")
+    ] = True,
+    provider: Annotated[
+        str, typer.Option(help=f"Categorizer backend: {', '.join(PROVIDER_NAMES)}.")
+    ] = "rules",
+    model: Annotated[str | None, typer.Option(help="Model id, for model-backed providers.")] = None,
+    min_confidence: Annotated[
+        float, typer.Option(help="Below this, an answer becomes an abstention.")
+    ] = DEFAULT_MIN_CONFIDENCE,
+) -> None:
+    """Score a categorizer against the hand-labelled corpus.
+
+    Exits non-zero if any labelled regression was categorized as a flake —
+    the gate that has to hold before auto-filing could ever be enabled.
+    """
+    try:
+        examples = load_labels(labels)
+        result = evaluate(
+            examples,
+            provider_name=_resolve_provider(provider, offline),
+            model=model,
+            min_confidence=min_confidence,
+        )
+    except (LabelError, ProviderError, OSError) as exc:
+        typer.secho(f"eval failed: {exc}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from exc
+
+    typer.echo(format_report(result))
+
+    if result.missed_regressions:
+        typer.secho(
+            f"\nFAIL: {len(result.missed_regressions)} regression(s) categorized as flakes.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
 
 
 def main() -> None:
