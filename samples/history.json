@@ -1,0 +1,211 @@
+{
+  "schema": "flakectl/history/v1",
+  "_comment": [
+    "Re-run history in the shape the GitHub Actions API supplies it:",
+    "runs -> attempts -> jobs -> which tests failed in each attempt.",
+    "In production this is fetched from /runs/{id}/attempts/{n} and cached.",
+    "Here it is a file so the demo is deterministic and offline.",
+    "",
+    "The 'log' field binds a run to the log it produced; in production the",
+    "failure record already carries its job id."
+  ],
+  "runs": [
+    {
+      "run_id": 17420031991,
+      "log": "int_fedora41_real_regression.log",
+      "head_sha": "9f3c1d7a4b2e8056",
+      "base_sha": "1a2b3c4d5e6f7089",
+      "branch": "pr/29145",
+      "job": "int podman fedora-41 root host sqlite",
+      "os": "fedora-41",
+      "jobs": [
+        {
+          "name": "int podman fedora-41 root host sqlite",
+          "attempts": [
+            {
+              "attempt": 1,
+              "conclusion": "failure",
+              "failed_tests": [
+                "Podman kube play [It] podman kube play --validate=strict rejects unknown fields"
+              ]
+            },
+            {
+              "attempt": 2,
+              "conclusion": "failure",
+              "failed_tests": [
+                "Podman kube play [It] podman kube play --validate=strict rejects unknown fields"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 17431887402,
+      "log": "int_fedora41_race_timing.log",
+      "head_sha": "c4e8b1a6f0d29357",
+      "base_sha": "1a2b3c4d5e6f7089",
+      "branch": "pr/29282",
+      "job": "int podman fedora-41 root host sqlite",
+      "os": "fedora-41",
+      "jobs": [
+        {
+          "name": "int podman fedora-41 root host sqlite",
+          "attempts": [
+            {
+              "attempt": 1,
+              "conclusion": "failure",
+              "failed_tests": [
+                "Podman healthcheck run [It] podman healthcheck run that succeeds"
+              ]
+            },
+            { "attempt": 2, "conclusion": "success", "failed_tests": [] }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 17425500118,
+      "log": "int_rawhide_infra_registry.log",
+      "head_sha": "7b0f2a9c3e5d1846",
+      "base_sha": "1a2b3c4d5e6f7089",
+      "branch": "main",
+      "job": "int podman rawhide rootless host sqlite",
+      "os": "rawhide",
+      "jobs": [
+        {
+          "name": "int podman rawhide rootless host sqlite",
+          "attempts": [
+            {
+              "attempt": 1,
+              "conclusion": "failure",
+              "failed_tests": ["Podman pull [It] podman pull from docker with tag"]
+            },
+            { "attempt": 2, "conclusion": "success", "failed_tests": [] }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 17440129553,
+      "log": "int_fedora41_test_pollution.log",
+      "head_sha": "e2d6a8b4c1f07539",
+      "base_sha": "1a2b3c4d5e6f7089",
+      "branch": "pr/29322",
+      "job": "int podman fedora-41 root host boltdb",
+      "os": "fedora-41",
+      "jobs": [
+        {
+          "name": "int podman fedora-41 root host boltdb",
+          "attempts": [
+            {
+              "attempt": 1,
+              "conclusion": "failure",
+              "failed_tests": ["Podman pod create [It] podman pod create --infra-name"]
+            },
+            { "attempt": 2, "conclusion": "success", "failed_tests": [] }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 17411002874,
+      "log": "int_rawhide_env_drift.log",
+      "head_sha": "b5a1c9e3f7d24608",
+      "base_sha": "1a2b3c4d5e6f7089",
+      "branch": "pr/29473",
+      "job": "int podman rawhide root host sqlite",
+      "os": "rawhide",
+      "jobs": [
+        {
+          "name": "int podman rawhide root host sqlite",
+          "attempts": [
+            {
+              "attempt": 1,
+              "conclusion": "failure",
+              "failed_tests": [
+                "Podman run [It] podman run with --systemd=always and cgroups v1"
+              ]
+            },
+            {
+              "attempt": 2,
+              "conclusion": "failure",
+              "failed_tests": [
+                "Podman run [It] podman run with --systemd=always and cgroups v1"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 17444871206,
+      "log": "sys_fedora41_network_timeout.log",
+      "head_sha": "3c7f0b2d8a19e546",
+      "base_sha": "1a2b3c4d5e6f7089",
+      "branch": "pr/29098",
+      "job": "sys podman fedora-41 rootless host",
+      "os": "fedora-41",
+      "jobs": [
+        {
+          "name": "sys podman fedora-41 rootless host",
+          "attempts": [
+            {
+              "attempt": 1,
+              "conclusion": "failure",
+              "failed_tests": [
+                "podman run with slirp4netns assigns correct addresses to /etc/hosts"
+              ]
+            },
+            { "attempt": 2, "conclusion": "success", "failed_tests": [] }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 17449002311,
+      "log": "junit_int_remote.xml",
+      "head_sha": "d8e4f1a7c0b39625",
+      "base_sha": "1a2b3c4d5e6f7089",
+      "branch": "pr/29055",
+      "job": "int remote podman fedora-41 root host sqlite",
+      "os": "fedora-41",
+      "jobs": [
+        {
+          "name": "int remote podman fedora-41 root host sqlite",
+          "attempts": [
+            {
+              "attempt": 1,
+              "conclusion": "failure",
+              "failed_tests": [
+                "Podman pull podman pull from docker with tag",
+                "Podman network create podman network create with subnet"
+              ]
+            },
+            {
+              "attempt": 2,
+              "conclusion": "failure",
+              "failed_tests": ["Podman network create podman network create with subnet"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "baseline": [
+    {
+      "test": "Podman run [It] podman run with --systemd=always and cgroups v1",
+      "conclusion": "failure",
+      "base_sha": "1a2b3c4d5e6f7089",
+      "branch": "main",
+      "job": "int podman rawhide root host sqlite"
+    },
+    {
+      "test": "Podman kube play [It] podman kube play --validate=strict rejects unknown fields",
+      "conclusion": "success",
+      "base_sha": "1a2b3c4d5e6f7089",
+      "branch": "main",
+      "job": "int podman fedora-41 root host sqlite"
+    }
+  ]
+}

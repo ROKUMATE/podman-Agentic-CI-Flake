@@ -1,0 +1,29 @@
+{
+  "_comment": "Recent commits per path, standing in for a git log / the commits API. A recent change to the code under test is evidence for a regression rather than a flake.",
+  "pkg/domain/entities": [
+    {
+      "sha": "4c1e9a7",
+      "date": "2026-08-26",
+      "author": "a-maintainer",
+      "subject": "kube play: plumb KubeValidateMode through the entities layer"
+    }
+  ],
+  "cmd/podman/kube": [
+    {
+      "sha": "9f3c1d7",
+      "date": "2026-08-27",
+      "author": "a-maintainer",
+      "subject": "kube play: rename --validate to --validation-mode"
+    }
+  ],
+  "libpod/healthcheck.go": [
+    {
+      "sha": "b21d0f4",
+      "date": "2026-06-14",
+      "author": "another-maintainer",
+      "subject": "healthcheck: reduce default start-period"
+    }
+  ],
+  "pkg/machine/env": [],
+  "test/e2e/pod_create_test.go": []
+}

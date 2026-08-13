@@ -1,0 +1,31 @@
+2026-08-27T09:11:02.1120000Z ##[group]Run make localintegration
+2026-08-27T09:11:02.1120000Z Running Suite: Podman E2E Suite - /var/tmp/go/src/github.com/containers/podman/test/e2e
+2026-08-27T09:11:02.1130000Z ========================================================================
+2026-08-27T09:11:02.1140000Z Random Seed: 1756449102
+2026-08-27T09:11:02.1150000Z Will run 512 of 600 specs
+2026-08-27T09:11:44.9020000Z ••••••••••••••••••••••••••••••••
+2026-08-27T09:12:44.1200000Z ------------------------------
+2026-08-27T09:12:44.1210000Z • [FAILED] [0.412 seconds]
+2026-08-27T09:12:44.1220000Z Podman kube play [It] podman kube play --validate=strict rejects unknown fields
+2026-08-27T09:12:44.1230000Z /var/tmp/go/src/github.com/containers/podman/test/e2e/play_kube_test.go:1204
+2026-08-27T09:12:44.1240000Z
+2026-08-27T09:12:44.1250000Z   Running: podman kube play --validate=strict /tmp/podman_test_902133/kube.yaml
+2026-08-27T09:12:44.1260000Z   Error: unknown flag: --validate
+2026-08-27T09:12:44.1270000Z   See 'podman kube play --help'
+2026-08-27T09:12:44.1280000Z
+2026-08-27T09:12:44.1290000Z   [FAILED] Expected
+2026-08-27T09:12:44.1300000Z       <int>: 125
+2026-08-27T09:12:44.1310000Z   to equal
+2026-08-27T09:12:44.1320000Z       <int>: 0
+2026-08-27T09:12:44.1330000Z
+2026-08-27T09:12:44.1340000Z   In [It] at: /var/tmp/go/src/github.com/containers/podman/test/e2e/play_kube_test.go:1211 @ 08/27/26 09:12:44.133
+2026-08-27T09:12:44.1350000Z ------------------------------
+2026-08-27T09:14:02.9000000Z ••••••••••••••••••••
+2026-08-27T09:14:03.0000000Z
+2026-08-27T09:14:03.0010000Z Summarizing 1 Failure:
+2026-08-27T09:14:03.0020000Z   [FAIL] Podman kube play [It] podman kube play --validate=strict rejects unknown fields
+2026-08-27T09:14:03.0030000Z   /var/tmp/go/src/github.com/containers/podman/test/e2e/play_kube_test.go:1211
+2026-08-27T09:14:03.0040000Z
+2026-08-27T09:14:03.0050000Z Ran 512 of 600 Specs in 1780.888 seconds
+2026-08-27T09:14:03.0060000Z FAIL! -- 511 Passed | 1 Failed | 0 Pending | 88 Skipped
+2026-08-27T09:14:03.0070000Z ##[error]Process completed with exit code 1.

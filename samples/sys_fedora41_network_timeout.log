@@ -1,0 +1,22 @@
+2026-08-29T11:02:18.4000000Z ##[group]Run make localsystem
+2026-08-29T11:02:18.4010000Z # bats test/system/500-networking.bats
+2026-08-29T11:02:18.4020000Z 1..38
+2026-08-29T11:02:19.1000000Z ok 1 podman network - basic tests
+2026-08-29T11:02:21.5500000Z ok 2 podman network create/rm
+2026-08-29T11:02:26.0300000Z ok 3 podman network reload
+2026-08-29T11:02:41.8800000Z not ok 4 podman run with slirp4netns assigns correct addresses to /etc/hosts
+2026-08-29T11:02:41.8810000Z # (from function `die' in file test/system/helpers.bash, line 813,
+2026-08-29T11:02:41.8820000Z #  from function `run_podman' in file test/system/helpers.bash, line 452,
+2026-08-29T11:02:41.8830000Z #  in test file test/system/500-networking.bats, line 214)
+2026-08-29T11:02:41.8840000Z #   `run_podman run --rm --network pasta $IMAGE cat /etc/hosts' failed
+2026-08-29T11:02:41.8850000Z #
+2026-08-29T11:02:41.8860000Z # $ podman run --rm --network pasta quay.io/libpod/testimage:20241011 cat /etc/hosts
+2026-08-29T11:02:41.8870000Z # Error: pasta failed with exit code 1:
+2026-08-29T11:02:41.8880000Z # No routable interface for IPv4: IPv4 is disabled
+2026-08-29T11:02:41.8890000Z # Couldn't open network namespace /run/user/1000/netns/netns-4f8a9b2c: dial tcp 10.88.0.1:5355: i/o timeout
+2026-08-29T11:02:41.8900000Z #
+2026-08-29T11:02:41.8910000Z # [ rc=125 (** EXPECTED 0 **) ]
+2026-08-29T11:02:41.8920000Z ok 5 podman run with pasta and port forwarding
+2026-08-29T11:03:02.1000000Z ok 6 podman network connect/disconnect
+2026-08-29T11:09:44.0000000Z # -- 37 passed, 1 failed
+2026-08-29T11:09:44.0010000Z ##[error]Process completed with exit code 1.

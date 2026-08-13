@@ -20,6 +20,7 @@ from flakectl import __version__
 from flakectl.agent import DEFAULT_MIN_CONFIDENCE
 from flakectl.detector import HistoryError, RerunHistory
 from flakectl.fingerprint import fingerprint_failure
+from flakectl.junit import JUnitParseError
 from flakectl.parser import DEFAULT_BYTE_CAP
 from flakectl.pipeline import PipelineConfig, analyze as run_pipeline, ingest as run_ingest
 from flakectl.providers import PROVIDER_NAMES, ProviderError
@@ -59,6 +60,16 @@ def _load_history(path: str | None) -> RerunHistory | None:
         return RerunHistory.load(path)
     except (OSError, HistoryError, json.JSONDecodeError) as exc:
         raise typer.BadParameter(f"could not read history {path!r}: {exc}") from exc
+
+
+def _load_json(path: str | None, *, default):
+    """Load an optional JSON side-file backing one of the agent's tools."""
+    if path is None:
+        return default
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise typer.BadParameter(f"could not read {path!r}: {exc}") from exc
 
 
 def _resolve_provider(provider: str, offline: bool) -> str:
@@ -144,6 +155,12 @@ def analyze(
     source_root: Annotated[
         str | None, typer.Option(help="Checkout the agent may read test sources from.")
     ] = None,
+    issues: Annotated[
+        str | None, typer.Option(help="Known-issues JSON, backing the search_issues tool.")
+    ] = None,
+    changes: Annotated[
+        str | None, typer.Option(help="Recent-commits JSON, backing the recent_changes tool.")
+    ] = None,
     db: Annotated[str, typer.Option(help="SQLite store path. Defaults to in-memory.")] = MEMORY,
     out: Annotated[str | None, typer.Option(help="Write the JSON report here.")] = "report.json",
 ) -> None:
@@ -167,6 +184,8 @@ def analyze(
             max_total_bytes=max_tool_bytes,
             max_lines_per_call=DEFAULT_MAX_LINES_PER_CALL,
         ),
+        issues=_load_json(issues, default=[]),
+        changes=_load_json(changes, default={}),
     )
 
     try:
@@ -175,6 +194,9 @@ def analyze(
         )
     except ProviderError as exc:
         typer.secho(f"provider error: {exc}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from exc
+    except (JUnitParseError, OSError) as exc:
+        typer.secho(f"could not read input: {exc}", fg=typer.colors.RED, err=True)
         raise typer.Exit(code=2) from exc
 
     typer.echo(render_table(report))

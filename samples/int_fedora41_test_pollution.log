@@ -1,0 +1,31 @@
+2026-08-29T07:20:41.3000000Z ##[group]Run make localintegration
+2026-08-29T07:20:41.3010000Z Running Suite: Podman E2E Suite - /var/tmp/go/src/github.com/containers/podman/test/e2e
+2026-08-29T07:20:41.3020000Z ========================================================================
+2026-08-29T07:20:41.3030000Z Random Seed: 1756450841
+2026-08-29T07:20:41.3040000Z Will run 512 of 600 specs (parallel, 6 nodes)
+2026-08-29T07:21:55.0000000Z ••••••••••••••••
+2026-08-29T07:22:31.6600000Z ------------------------------
+2026-08-29T07:22:31.6610000Z • [FAILED] [0.318 seconds]
+2026-08-29T07:22:31.6620000Z Podman pod create [It] podman pod create --infra-name
+2026-08-29T07:22:31.6630000Z /var/tmp/go/src/github.com/containers/podman/test/e2e/pod_create_test.go:342
+2026-08-29T07:22:31.6640000Z
+2026-08-29T07:22:31.6650000Z   Running: podman pod create --infra-name podman-test-infra --name test-pod
+2026-08-29T07:22:31.6660000Z   Error: error creating container storage: the container name "podman-test-infra" is already in use by 8f2c1a9d4e7b3f5a6c0d2e8b1f4a7c3d9e5b0a2f6c8d1e3b7a5f9c2d4e6b8a0f
+2026-08-29T07:22:31.6670000Z   You have to remove that container to be able to reuse that name: that name is already in use
+2026-08-29T07:22:31.6680000Z
+2026-08-29T07:22:31.6690000Z   [FAILED] Expected
+2026-08-29T07:22:31.6700000Z       <int>: 125
+2026-08-29T07:22:31.6710000Z   to equal
+2026-08-29T07:22:31.6720000Z       <int>: 0
+2026-08-29T07:22:31.6730000Z
+2026-08-29T07:22:31.6740000Z   In [It] at: /var/tmp/go/src/github.com/containers/podman/test/e2e/pod_create_test.go:351 @ 08/29/26 07:22:31.673
+2026-08-29T07:22:31.6750000Z ------------------------------
+2026-08-29T07:48:12.0000000Z ••••••••••••
+2026-08-29T07:48:13.0000000Z
+2026-08-29T07:48:13.0010000Z Summarizing 1 Failure:
+2026-08-29T07:48:13.0020000Z   [FAIL] Podman pod create [It] podman pod create --infra-name
+2026-08-29T07:48:13.0030000Z   /var/tmp/go/src/github.com/containers/podman/test/e2e/pod_create_test.go:351
+2026-08-29T07:48:13.0040000Z
+2026-08-29T07:48:13.0050000Z Ran 512 of 600 Specs in 1651.700 seconds
+2026-08-29T07:48:13.0060000Z FAIL! -- 511 Passed | 1 Failed | 0 Pending | 88 Skipped
+2026-08-29T07:48:13.0070000Z ##[error]Process completed with exit code 1.

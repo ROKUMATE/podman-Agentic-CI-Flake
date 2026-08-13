@@ -1,0 +1,31 @@
+2026-08-28T14:02:11.0010000Z ##[group]Run make localintegration
+2026-08-28T14:02:11.0020000Z Running Suite: Podman E2E Suite - /var/tmp/go/src/github.com/containers/podman/test/e2e
+2026-08-28T14:02:11.0030000Z ========================================================================
+2026-08-28T14:02:11.0040000Z Random Seed: 1756531331
+2026-08-28T14:02:11.0050000Z Will run 512 of 600 specs
+2026-08-28T14:03:55.4100000Z ••••••••••••••••••••••••
+2026-08-28T14:05:12.7700000Z ------------------------------
+2026-08-28T14:05:12.7710000Z • [FAILED] [3.004 seconds]
+2026-08-28T14:05:12.7720000Z Podman healthcheck run [It] podman healthcheck run that succeeds
+2026-08-28T14:05:12.7730000Z /var/tmp/go/src/github.com/containers/podman/test/e2e/healthcheck_run_test.go:88
+2026-08-28T14:05:12.7740000Z
+2026-08-28T14:05:12.7750000Z   Running: podman container inspect --format {{.State.Health.Status}} hc-a1b2c3d4e5f6
+2026-08-28T14:05:12.7760000Z   Output: starting
+2026-08-28T14:05:12.7770000Z
+2026-08-28T14:05:12.7780000Z   [FAILED] Timed out after 3.000s.
+2026-08-28T14:05:12.7790000Z   Expected
+2026-08-28T14:05:12.7800000Z       <string>: starting
+2026-08-28T14:05:12.7810000Z   to equal
+2026-08-28T14:05:12.7820000Z       <string>: healthy
+2026-08-28T14:05:12.7830000Z
+2026-08-28T14:05:12.7840000Z   In [It] at: /var/tmp/go/src/github.com/containers/podman/test/e2e/healthcheck_run_test.go:104 @ 08/28/26 14:05:12.783
+2026-08-28T14:05:12.7850000Z ------------------------------
+2026-08-28T14:31:44.2000000Z ••••••••••••••••••
+2026-08-28T14:31:45.0000000Z
+2026-08-28T14:31:45.0010000Z Summarizing 1 Failure:
+2026-08-28T14:31:45.0020000Z   [FAIL] Podman healthcheck run [It] podman healthcheck run that succeeds
+2026-08-28T14:31:45.0030000Z   /var/tmp/go/src/github.com/containers/podman/test/e2e/healthcheck_run_test.go:104
+2026-08-28T14:31:45.0040000Z
+2026-08-28T14:31:45.0050000Z Ran 512 of 600 Specs in 1774.199 seconds
+2026-08-28T14:31:45.0060000Z FAIL! -- 511 Passed | 1 Failed | 0 Pending | 88 Skipped
+2026-08-28T14:31:45.0070000Z ##[error]Process completed with exit code 1.

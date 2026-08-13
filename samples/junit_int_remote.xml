@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ginkgo's junit-report output. This is the preferred ingestion path: the
+  test name, spec file, line number and failure message are already
+  delimited, so no log scraping is required.
+-->
+<testsuites tests="512" disabled="0" errors="0" failures="2" time="1698.442">
+  <testsuite name="Podman E2E Suite" package="/var/tmp/go/src/github.com/containers/podman/test/e2e" tests="512" disabled="0" skipped="88" errors="0" failures="2" time="1698.442" hostname="fedora-41">
+    <properties>
+      <property name="SuiteSucceeded" value="false"></property>
+      <property name="RandomSeed" value="1756612384"></property>
+      <property name="job" value="int remote podman fedora-41 root host sqlite"></property>
+      <property name="os" value="fedora-41"></property>
+    </properties>
+    <testcase name="Podman pull podman pull from docker with tag" classname="Podman E2E Suite" status="failed" time="9.118" file="test/e2e/pull_test.go" line="216">
+      <failure message="Expected&#10;    &lt;int&gt;: 125&#10;to equal&#10;    &lt;int&gt;: 0" type="failed">[FAILED] Expected exit code 0
+Running: podman pull quay.io/libpod/alpine:3.10.2
+Trying to pull quay.io/libpod/alpine:3.10.2...
+Error: initializing source docker://quay.io/libpod/alpine:3.10.2: reading manifest 3.10.2 in quay.io/libpod/alpine: received unexpected HTTP status: 503 Service Unavailable
+In [It] at: /var/tmp/go/src/github.com/containers/podman/test/e2e/pull_test.go:216 @ 08/30/26 05:11:24.881</failure>
+    </testcase>
+    <testcase name="Podman network create podman network create with subnet" classname="Podman E2E Suite" status="failed" time="2.004" file="test/e2e/network_create_test.go" line="188">
+      <failure message="Expected&#10;    &lt;int&gt;: 125&#10;to equal&#10;    &lt;int&gt;: 0" type="failed">[FAILED] Expected exit code 0
+Running: podman network create --subnet 10.99.0.0/24 podman1
+Error: network with name podman1 already exists
+In [It] at: /var/tmp/go/src/github.com/containers/podman/test/e2e/network_create_test.go:188 @ 08/30/26 05:12:02.117</failure>
+    </testcase>
+    <testcase name="Podman run podman run with --net=host" classname="Podman E2E Suite" status="passed" time="1.442"></testcase>
+    <testcase name="Podman machine podman machine init on darwin" classname="Podman E2E Suite" status="skipped" time="0">
+      <skipped message="Only runs on darwin"></skipped>
+    </testcase>
+  </testsuite>
+</testsuites>

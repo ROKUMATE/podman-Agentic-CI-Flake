@@ -1,0 +1,33 @@
+2026-08-26T22:14:03.7000000Z ##[group]Run make localintegration
+2026-08-26T22:14:03.7010000Z Running Suite: Podman E2E Suite - /var/tmp/go/src/github.com/containers/podman/test/e2e
+2026-08-26T22:14:03.7020000Z ========================================================================
+2026-08-26T22:14:03.7030000Z Random Seed: 1756246443
+2026-08-26T22:14:03.7040000Z podman version 5.7.0-dev
+2026-08-26T22:14:03.7050000Z runtime: crun version 1.24
+2026-08-26T22:14:03.7060000Z Will run 512 of 600 specs
+2026-08-26T22:15:41.0000000Z ••••••••••••
+2026-08-26T22:16:20.4400000Z ------------------------------
+2026-08-26T22:16:20.4410000Z • [FAILED] [0.204 seconds]
+2026-08-26T22:16:20.4420000Z Podman run [It] podman run with --systemd=always and cgroups v1
+2026-08-26T22:16:20.4430000Z /var/tmp/go/src/github.com/containers/podman/test/e2e/run_systemd_test.go:71
+2026-08-26T22:16:20.4440000Z
+2026-08-26T22:16:20.4450000Z   Running: podman run --systemd=always quay.io/libpod/systemd-image:20240124 /usr/sbin/init
+2026-08-26T22:16:20.4460000Z   Error: crun: unknown version specified in config: OCI runtime error
+2026-08-26T22:16:20.4470000Z   Error: systemd version 258 does not support the legacy cgroup hierarchy
+2026-08-26T22:16:20.4480000Z
+2026-08-26T22:16:20.4490000Z   [FAILED] Expected
+2026-08-26T22:16:20.4500000Z       <int>: 126
+2026-08-26T22:16:20.4510000Z   to equal
+2026-08-26T22:16:20.4520000Z       <int>: 0
+2026-08-26T22:16:20.4530000Z
+2026-08-26T22:16:20.4540000Z   In [It] at: /var/tmp/go/src/github.com/containers/podman/test/e2e/run_systemd_test.go:79 @ 08/26/26 22:16:20.453
+2026-08-26T22:16:20.4550000Z ------------------------------
+2026-08-26T22:42:07.0000000Z ••••••••••••••
+2026-08-26T22:42:08.0000000Z
+2026-08-26T22:42:08.0010000Z Summarizing 1 Failure:
+2026-08-26T22:42:08.0020000Z   [FAIL] Podman run [It] podman run with --systemd=always and cgroups v1
+2026-08-26T22:42:08.0030000Z   /var/tmp/go/src/github.com/containers/podman/test/e2e/run_systemd_test.go:79
+2026-08-26T22:42:08.0040000Z
+2026-08-26T22:42:08.0050000Z Ran 512 of 600 Specs in 1684.300 seconds
+2026-08-26T22:42:08.0060000Z FAIL! -- 511 Passed | 1 Failed | 0 Pending | 88 Skipped
+2026-08-26T22:42:08.0070000Z ##[error]Process completed with exit code 1.

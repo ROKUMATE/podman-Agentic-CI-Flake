@@ -1,0 +1,31 @@
+2026-08-28T03:41:09.5000000Z ##[group]Run make localintegration
+2026-08-28T03:41:09.5010000Z Running Suite: Podman E2E Suite - /var/tmp/go/src/github.com/containers/podman/test/e2e
+2026-08-28T03:41:09.5020000Z ========================================================================
+2026-08-28T03:41:09.5030000Z Random Seed: 1756350069
+2026-08-28T03:41:09.5040000Z Will run 512 of 600 specs
+2026-08-28T03:42:30.1000000Z ••••••••••
+2026-08-28T03:43:18.8800000Z ------------------------------
+2026-08-28T03:43:18.8810000Z • [FAILED] [8.221 seconds]
+2026-08-28T03:43:18.8820000Z Podman pull [It] podman pull from docker with tag
+2026-08-28T03:43:18.8830000Z /var/tmp/go/src/github.com/containers/podman/test/e2e/pull_test.go:212
+2026-08-28T03:43:18.8840000Z
+2026-08-28T03:43:18.8850000Z   Running: podman pull quay.io/libpod/alpine:3.10.2
+2026-08-28T03:43:18.8860000Z   Trying to pull quay.io/libpod/alpine:3.10.2...
+2026-08-28T03:43:18.8870000Z   Error: initializing source docker://quay.io/libpod/alpine:3.10.2: reading manifest 3.10.2 in quay.io/libpod/alpine: toomanyrequests: Rate exceeded
+2026-08-28T03:43:18.8880000Z
+2026-08-28T03:43:18.8890000Z   [FAILED] Expected
+2026-08-28T03:43:18.8900000Z       <int>: 125
+2026-08-28T03:43:18.8910000Z   to equal
+2026-08-28T03:43:18.8920000Z       <int>: 0
+2026-08-28T03:43:18.8930000Z
+2026-08-28T03:43:18.8940000Z   In [It] at: /var/tmp/go/src/github.com/containers/podman/test/e2e/pull_test.go:216 @ 08/28/26 03:43:18.893
+2026-08-28T03:43:18.8950000Z ------------------------------
+2026-08-28T04:09:55.0000000Z ••••••••••••••••
+2026-08-28T04:09:56.0000000Z
+2026-08-28T04:09:56.0010000Z Summarizing 1 Failure:
+2026-08-28T04:09:56.0020000Z   [FAIL] Podman pull [It] podman pull from docker with tag
+2026-08-28T04:09:56.0030000Z   /var/tmp/go/src/github.com/containers/podman/test/e2e/pull_test.go:216
+2026-08-28T04:09:56.0040000Z
+2026-08-28T04:09:56.0050000Z Ran 512 of 600 Specs in 1726.500 seconds
+2026-08-28T04:09:56.0060000Z FAIL! -- 511 Passed | 1 Failed | 0 Pending | 88 Skipped
+2026-08-28T04:09:56.0070000Z ##[error]Process completed with exit code 1.

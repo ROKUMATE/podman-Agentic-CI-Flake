@@ -82,6 +82,10 @@ class PipelineConfig:
     source_root: Path | None = None
     budget: ToolBudget = field(default_factory=ToolBudget)
     taxonomy: Taxonomy | None = None
+    #: Backing data for the agent's search_issues and recent_changes tools.
+    #: In production these are the issues API and git history.
+    issues: list[dict] = field(default_factory=list)
+    changes: dict[str, list[dict]] = field(default_factory=dict)
 
 
 def ingest(
@@ -181,6 +185,8 @@ def analyze(
                 logs=_retained_log(source),
                 source_root=config.source_root,
                 store=store,
+                issues=config.issues,
+                changes=config.changes,
             )
 
             analysis = categorizer.categorize(
