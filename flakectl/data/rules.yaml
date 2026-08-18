@@ -1,0 +1,248 @@
+# Deterministic pre-filter — owned by maintainers.
+#
+# These rules run before any model is invoked. They are cheap, reviewable,
+# versionable and free, and they are the right place to encode something the
+# team already knows. When you get tired of watching the agent re-derive a
+# classification you could have written down, write it down here.
+#
+# Rule schema:
+#   id            unique, kebab-case, referenced in reports for traceability
+#   category      must exist in taxonomy.yaml
+#   confidence    0.0-1.0, how sure this signature makes us
+#   any_of        list of regexes; at least one must match
+#   all_of        list of regexes; every one must match (optional)
+#   none_of       list of regexes; none may match (optional, use as a guard)
+#   mitigation    what a maintainer should do about it
+#   case_sensitive  defaults to false
+#
+# Order matters: the first rule that matches wins, so put the specific ones
+# above the general ones.
+
+version: 1
+
+rules:
+  # ---- test pollution -------------------------------------------------
+  # Above infrastructure, because "already in use" reads like a resource
+  # problem but is almost always a leaked container from an earlier spec.
+  - id: pollution-name-in-use
+    category: test_pollution
+    confidence: 0.88
+    any_of:
+      - 'the container name "[^"]+" is already in use'
+      - "container name .* already in use"
+      - "error creating container storage: the container name"
+    mitigation: >-
+      An earlier spec leaked a container with this name. Fix cleanup in that
+      spec's AfterEach, or give both specs unique names. The spec that
+      reported the failure is probably innocent.
+
+  - id: pollution-network-exists
+    category: test_pollution
+    confidence: 0.85
+    any_of:
+      - "network with name \\S+ already exists"
+      - "network name .* already used"
+    mitigation: >-
+      A leaked network from a previous spec. Ensure network cleanup runs even
+      when the spec fails.
+
+  - id: pollution-image-in-use
+    category: test_pollution
+    confidence: 0.8
+    any_of:
+      - "image is in use by a container"
+      - "unlinkat .*: directory not empty"
+      - "layer is in use by a container"
+    mitigation: >-
+      Shared image store contention between specs. Check for a container left
+      running by an earlier spec in the same Ginkgo node.
+
+  # ---- infrastructure -------------------------------------------------
+  - id: infra-registry-rate-limit
+    category: infrastructure
+    confidence: 0.95
+    any_of:
+      - "toomanyrequests"
+      - "429 Too Many Requests"
+      - "Rate exceeded"
+      - "pull rate limit"
+    mitigation: >-
+      Registry rate limiting, not a Podman problem. Retry with backoff, use a
+      mirror, or pin to CITEST_IMAGE so the test does not pull from quay.io on
+      every run.
+
+  - id: infra-registry-5xx
+    category: infrastructure
+    confidence: 0.92
+    any_of:
+      - "received unexpected HTTP status: 5\\d{2}"
+      - "unexpected status code 5\\d{2}"
+      - "registry returned 5\\d{2}"
+      - "502 Bad Gateway"
+      - "503 Service Unavailable"
+    mitigation: >-
+      The registry was unhealthy. Retry; if it recurs at a rate worth caring
+      about, mirror the image rather than pulling it in CI.
+
+  - id: infra-disk-pressure
+    category: infrastructure
+    confidence: 0.94
+    any_of:
+      - "no space left on device"
+      - "disk quota exceeded"
+      - "ENOSPC"
+    mitigation: >-
+      The runner ran out of disk. Prune between suites or move to a larger
+      runner; this is capacity, not code.
+
+  - id: infra-runner-evicted
+    category: infrastructure
+    confidence: 0.93
+    any_of:
+      - "The runner has received a shutdown signal"
+      - "The operation was canceled"
+      - "lost communication with the server"
+      - "Out of memory: Killed process"
+      - "signal: killed"
+    mitigation: >-
+      The runner went away mid-job. Nothing to fix in the test; track the
+      frequency and raise it with infra if it climbs.
+
+  # ---- network / timeout ----------------------------------------------
+  - id: net-dial-timeout
+    category: network_timeout
+    confidence: 0.9
+    any_of:
+      - "dial tcp .*: i/o timeout"
+      - "dial tcp .*: connect: connection refused"
+      - "TLS handshake timeout"
+    mitigation: >-
+      A socket did not come up in time. Wait on readiness rather than elapsed
+      time, and confirm the service under test is actually listening.
+
+  - id: net-dns-failure
+    category: network_timeout
+    confidence: 0.91
+    any_of:
+      - "lookup \\S+: no such host"
+      - "Temporary failure in name resolution"
+      - "server misbehaving"
+      - "could not resolve host"
+    mitigation: >-
+      DNS failed on the runner. Usually transient; if it is frequent for one
+      host, cache or mirror it.
+
+  - id: net-podman-stack-startup
+    category: network_timeout
+    confidence: 0.87
+    any_of:
+      - "pasta failed with exit code"
+      - "unable to start aardvark-dns"
+      - "netavark: .*(timeout|failed to configure)"
+      - "slirp4netns failed"
+      - "rootlessport .*: timed out"
+    mitigation: >-
+      Podman's own networking stack had not finished starting. Poll for the
+      interface or the DNS responder instead of assuming it is ready.
+
+  - id: net-context-deadline
+    category: network_timeout
+    confidence: 0.83
+    any_of:
+      - "context deadline exceeded"
+      - "Client.Timeout exceeded while awaiting headers"
+    none_of:
+      - "no space left on device"
+    mitigation: >-
+      An operation exceeded its deadline. Check whether the deadline is
+      realistic for the slowest runner in the matrix before widening it.
+
+  # ---- race / timing --------------------------------------------------
+  - id: timing-fixed-sleep
+    category: race_timing
+    confidence: 0.86
+    any_of:
+      - "time\\.Sleep\\("
+      - "sleep \\d+ *(?:#|;|$)"
+    all_of:
+      - "(?i)(timed out|expected|failed)"
+    mitigation: >-
+      The spec waits a fixed amount of time instead of waiting for the
+      condition. Replace the sleep with Eventually and assert on the state.
+
+  - id: timing-ginkgo-timeout
+    category: race_timing
+    confidence: 0.78
+    any_of:
+      - "Timed out after \\d+(\\.\\d+)?s"
+      - "Timeout exceeded while waiting for"
+    none_of:
+      - "dial tcp"
+      - "no such host"
+      - "context deadline exceeded"
+    mitigation: >-
+      A Gomega assertion timed out with no network cause in evidence. Usually
+      the polled condition is not the one that actually settles.
+
+  - id: timing-healthcheck-not-converged
+    category: race_timing
+    confidence: 0.89
+    any_of:
+      - 'healthcheck .*"starting"'
+      - "health status is starting"
+      - "container is not yet running"
+      - "expected .*healthy.* got .*starting"
+    mitigation: >-
+      The healthcheck had not converged when the assertion ran. Wait for the
+      healthy state rather than for a duration.
+
+  # ---- environment drift ----------------------------------------------
+  - id: env-runtime-version
+    category: environment_drift
+    confidence: 0.88
+    any_of:
+      - "crun: unknown version"
+      - "runc: .*not supported"
+      - "systemd version \\d+ does not support"
+      - "conmon version .* is too old"
+    mitigation: >-
+      A runtime component on the image changed under the tests. Gate on a
+      capability check rather than a version, and confirm against the previous
+      runner image before treating it as a regression.
+
+  - id: env-kernel-capability
+    category: environment_drift
+    confidence: 0.85
+    any_of:
+      - "cgroup v2 .*(required|not available)"
+      - "kernel does not support"
+      - "operation not permitted.*idmapped"
+      - "overlay: .*not supported on this kernel"
+    mitigation: >-
+      A kernel capability the test assumes is missing on this image. Skip on
+      capability rather than on distro name.
+
+  # ---- real regression ------------------------------------------------
+  # Deliberately few and deliberately specific. A rule that guesses
+  # "regression" is worse than no rule, because a false regression is the
+  # failure mode that costs maintainer trust fastest.
+  - id: regression-unknown-flag
+    category: real_regression
+    confidence: 0.87
+    any_of:
+      - "unknown flag: --\\S+"
+      - "unknown shorthand flag:"
+      - "unknown command \\S+ for"
+    mitigation: >-
+      The CLI surface no longer matches what the test expects. This is a
+      behaviour change in Podman, not a flake — escalate to the PR author.
+
+  - id: regression-nil-pointer
+    category: real_regression
+    confidence: 0.82
+    all_of:
+      - "panic: runtime error: invalid memory address or nil pointer dereference"
+      - "github.com/containers/podman"
+    mitigation: >-
+      A nil dereference inside Podman itself. Escalate with the goroutine
+      trace; do not retry and do not quarantine.
