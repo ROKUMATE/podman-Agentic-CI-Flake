@@ -77,6 +77,26 @@ class Analysis:
     cached: bool = False
 
 
+@dataclass(frozen=True, slots=True)
+class Occurrence:
+    """How often one fingerprint has been seen, and where.
+
+    ``is_new`` is called out separately because a brand-new signature
+    usually means something changed recently, which makes it the most
+    actionable line on a weekly report.
+    """
+
+    fingerprint: str
+    signature: str
+    test_identity: str
+    count: int
+    first_seen: str
+    last_seen: str
+    jobs: tuple[str, ...] = ()
+    oses: tuple[str, ...] = ()
+    is_new: bool = False
+
+
 @dataclass(slots=True)
 class TriagedFailure:
     """A failure after the full pipeline has run over it."""
