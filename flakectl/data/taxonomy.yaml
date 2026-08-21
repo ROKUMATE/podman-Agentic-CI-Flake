@@ -1,0 +1,137 @@
+# Flake taxonomy — owned by maintainers, not by the code.
+#
+# Adding, renaming or re-describing a category is a YAML edit and a review,
+# not a code change. The categorizer is handed these descriptions and
+# example signatures at analysis time, so editing this file changes how
+# failures are classified.
+#
+# Two flags carry behaviour:
+#   escalate: this category must never be absorbed into "flake"
+#   abstain:  this is the answer when the tool does not know
+
+version: 1
+
+categories:
+  - name: infrastructure
+    summary: The runner or a service it depends on failed, not the code.
+    description: >-
+      The job died for reasons unrelated to Podman's behaviour: the runner was
+      evicted or ran out of memory or disk, or a registry returned 429/5xx
+      while pulling an image. Nothing about the product changed; the machine
+      or a remote service let us down.
+    example_signatures:
+      - "toomanyrequests: Rate exceeded (429) from quay.io"
+      - "received unexpected HTTP status: 503 Service Unavailable"
+      - "no space left on device"
+      - "The runner has received a shutdown signal"
+      - "Cannot connect to the Docker daemon"
+    typical_mitigation: >-
+      Retry with backoff, pin or mirror the image, or raise runner capacity.
+      Track the rate rather than the individual occurrence.
+    escalate: false
+    abstain: false
+
+  - name: network_timeout
+    summary: A network operation did not complete in the time allowed.
+    description: >-
+      DNS resolution failed, a socket timed out, or Podman's own networking
+      stack (pasta, netavark, slirp4netns) had not finished starting when the
+      test used it. Distinct from `race_timing` in that the thing being waited
+      on is a network resource, not test state.
+    example_signatures:
+      - "dial tcp: i/o timeout"
+      - "context deadline exceeded"
+      - "lookup quay.io: no such host"
+      - "pasta failed with exit code 1"
+      - "netavark: unable to start aardvark-dns"
+    typical_mitigation: >-
+      Widen the timeout, wait on readiness rather than elapsed time, or make
+      the network dependency explicit in the test's setup.
+    escalate: false
+    abstain: false
+
+  - name: race_timing
+    summary: The test raced the code it was testing.
+    description: >-
+      A spec polls with a fixed sleep instead of Eventually, asserts on a
+      healthcheck that has not converged, or otherwise assumes an operation
+      completed synchronously when it did not. The product may well be
+      correct; the test asked too early.
+    example_signatures:
+      - "Timed out after 3.000s."
+      - "time.Sleep(2 * time.Second)"
+      - "Expected <bool>: false to be true"
+      - "healthcheck status is \"starting\", expected \"healthy\""
+    typical_mitigation: >-
+      Replace fixed sleeps with Eventually/Consistently and assert on the
+      condition rather than on elapsed time.
+    escalate: false
+    abstain: false
+
+  - name: test_pollution
+    summary: An earlier test left state behind that broke a later, innocent one.
+    description: >-
+      A leaked container, a shared image store, a stale network or a parallel
+      Ginkgo node interfering with its neighbours. The loudest failure here is
+      usually the wrong one to blame — the spec that reports the failure is
+      often not the spec that caused it.
+    example_signatures:
+      - "error creating container storage: the container name is already in use"
+      - "network with name podman1 already exists"
+      - "unlinkat: directory not empty"
+      - "image is in use by a container"
+    typical_mitigation: >-
+      Fix cleanup in the polluting spec's AfterEach, or give the spec unique
+      resource names. Look upstream of the reported failure.
+    escalate: false
+    abstain: false
+
+  - name: environment_drift
+    summary: The runner image changed underneath the tests.
+    description: >-
+      A dependency bump — crun, the kernel, systemd, conmon, a distro package
+      — changed behaviour the tests relied on. Reproducible on the new image
+      and not on the old one, which makes it look like a regression until you
+      notice the code did not change.
+    example_signatures:
+      - "crun: unknown version specified"
+      - "systemd version 257 does not support"
+      - "cgroup v2 required but not available"
+      - "kernel does not support idmapped mounts"
+    typical_mitigation: >-
+      Pin the runner image or gate the test on a capability check rather than
+      a version number. Confirm against the previous image before escalating.
+    escalate: false
+    abstain: false
+
+  - name: real_regression
+    summary: The code under test is genuinely broken. Escalate.
+    description: >-
+      The failure is deterministic, reproduces across attempts, and points at
+      a behaviour change in Podman itself. This category exists so that a real
+      regression is never quietly absorbed into "flake" — the whole tool loses
+      its usefulness the first time that happens.
+    example_signatures:
+      - "failed on every attempt at the same commit"
+      - "Expected <string>: v5.2.0 to equal <string>: v5.3.0"
+      - "panic: runtime error: invalid memory address or nil pointer dereference"
+    typical_mitigation: >-
+      Escalate to the PR author or the area owner. Do not file as a flake, do
+      not retry, do not quarantine.
+    escalate: true
+    abstain: false
+
+  - name: unknown
+    summary: Not enough evidence to classify. Hand it to a human.
+    description: >-
+      The deterministic rules did not match and the categorizer was not
+      confident enough to commit to an answer. This is a first-class outcome,
+      not a failure of the tool: a system that abstains on 40% of failures and
+      is right about the rest is more useful than one that is confidently
+      wrong 30% of the time.
+    example_signatures: []
+    typical_mitigation: >-
+      Route to the weekly digest for human triage. Do not file an issue and do
+      not comment on a PR.
+    escalate: false
+    abstain: true
