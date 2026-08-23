@@ -59,11 +59,15 @@ def _clean(text: str) -> str:
     return "\n".join(lines)
 
 
-def _cap(text: str, byte_cap: int) -> tuple[str, bool]:
+def cap_block(text: str, byte_cap: int) -> tuple[str, bool]:
     """Cap ``text`` to ``byte_cap`` bytes, eliding the middle.
 
     The head carries the assertion and the tail carries the source location,
-    so the middle is what we can afford to lose.
+    so the middle is what we can afford to lose. Shared with the JUnit
+    ingestion path so both produce records of the same bounded size.
+
+    Returns:
+        The capped text and whether anything was dropped.
     """
     encoded = text.encode("utf-8", errors="replace")
     if len(encoded) <= byte_cap:
@@ -93,7 +97,7 @@ def _looks_like_ginkgo(text: str) -> bool:
     return bool(_SUMMARIZING.search(text) or _GINKGO_FAILED_HEADER.search(text))
 
 
-def _parse_location(block: str) -> tuple[str | None, int | None]:
+def find_source_location(block: str) -> tuple[str | None, int | None]:
     """Find the failing source location in a Ginkgo failure block.
 
     ``In [It] at: file.go:431`` points at the failing assertion and is
@@ -163,8 +167,8 @@ def _parse_ginkgo(text: str, byte_cap: int) -> list[Failure]:
         name = _parse_test_name(block)
         if not name:
             continue
-        spec_file, spec_line = _parse_location(block)
-        body, truncated = _cap(block.strip(), byte_cap)
+        spec_file, spec_line = find_source_location(block)
+        body, truncated = cap_block(block.strip(), byte_cap)
         matched_names.add(name)
         failures.append(
             Failure(
@@ -183,7 +187,7 @@ def _parse_ginkgo(text: str, byte_cap: int) -> list[Failure]:
     for name in summary_names:
         if name in matched_names:
             continue
-        body, truncated = _cap(f"[FAIL] {name}", byte_cap)
+        body, truncated = cap_block(f"[FAIL] {name}", byte_cap)
         failures.append(
             Failure(
                 test_name=name,
@@ -215,7 +219,7 @@ def _parse_generic(text: str, byte_cap: int, context_lines: int) -> list[Failure
             continue
         start = max(index - 2, 0)
         end = min(index + context_lines + 1, len(lines))
-        body, truncated = _cap("\n".join(lines[start:end]).strip(), byte_cap)
+        body, truncated = cap_block("\n".join(lines[start:end]).strip(), byte_cap)
         failures.append(
             Failure(
                 test_name=name,
