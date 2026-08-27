@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# Local run artifacts
+report.json
+weekly-report.md
+*.sqlite3
+flakectl.db
+
+# Never commit credentials
+.env

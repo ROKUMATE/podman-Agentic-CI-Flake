@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flakectl"
+version = "0.1.0"
+description = "Agentic CI flake categorization and analysis for Podman CI — proof of concept"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Rohit Kumawat" }]
+keywords = ["ci", "flake", "triage", "podman", "ginkgo"]
+
+dependencies = [
+    "typer>=0.12",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+# Hosted-model path. Not needed for --offline, which is the default.
+llm = ["anthropic>=0.40"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+flakectl = "flakectl.cli:main"
+# Alias so the `flake-triage ...` invocations from the build spec also work.
+flake-triage = "flakectl.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["flakectl*"]
+
+[tool.setuptools.package-data]
+flakectl = ["data/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
