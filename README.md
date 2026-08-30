@@ -77,7 +77,8 @@ Precision matters more than recall here, and the system has to be able to say
                                       │ only what's left
                                       ▼
                  ┌──────── Pillar 3: agentic analysis ──────┐
-                 │ provider    rules │ anthropic │ ollama   │
+                 │ provider    rules · anthropic ·          │
+                 │             gemini · ollama              │
                  │ tools       log / source / history /     │
                  │             issues / recent changes      │
                  │ budget      max calls, bytes, lines      │
@@ -143,10 +144,16 @@ schema → regression guard → confidence gate**. The regression guard is the o
 point at: if the categorizer claims a regression but a re-run passed at the same
 commit, the measured evidence wins and the failure goes to a human.
 
-Three providers sit behind one interface — `rules` (offline, the default),
-`anthropic` (hosted Claude, tool-calling), `ollama` (local). Same orchestrator,
-same schema, same taxonomy, same eval, so comparing them is a number rather than
-an argument.
+Four providers sit behind one interface — `rules` (offline, the default),
+`anthropic` (hosted Claude, tool-calling), `gemini` (hosted Google, function
+calling), `ollama` (local). Same orchestrator, same schema, same taxonomy, same
+eval, so comparing them is a number rather than an argument.
+
+Adding `gemini` was the test of whether that boundary is real: it needed one new
+file and two lines in a registry. Nothing in the orchestrator, tool layer, budget,
+schema or eval changed. The only vendor-specific wrinkle is that Gemini takes an
+OpenAPI subset rather than full JSON Schema, so `to_gemini_schema()` strips the
+keywords it rejects on the way out — the shared schema stays canonical.
 
 ### Pillar 4 — reporting
 
@@ -183,7 +190,7 @@ is the answer when the tool doesn't know).
 
 ```bash
 make install     # venv + editable install
-make test        # 267 tests
+make test        # 284 tests
 make demo        # the whole pipeline, offline, end to end
 make eval        # score the categorizer against the labelled corpus
 ```
@@ -205,15 +212,23 @@ flakectl eval
 The hosted and local paths are opt-in and change nothing else about the pipeline:
 
 ```bash
+# hosted Claude, tool-calling
 pip install -e ".[llm]"
 export ANTHROPIC_API_KEY=...          # read from the env, never stored or logged
 flakectl analyze samples/*.log --online --provider anthropic \
                  --source-root samples/src --issues samples/issues.json
 
+# hosted Gemini, function calling (no extra dependency — stdlib HTTP)
+export GEMINI_API_KEY=...
+flakectl analyze samples/*.log --online --provider gemini --model gemini-3.6-flash
+
 # or locally, with nothing leaving the machine:
 ollama serve
 flakectl analyze samples/*.log --online --provider ollama --model llama3.1
 ```
+
+Keys are read from the environment at request time and are never written to a
+report, a log line, or the store.
 
 ## Evaluation
 
@@ -297,8 +312,16 @@ This is a recent proof-of-concept exploring the problem, not a finished product.
   hand-labelling ~150 historical Podman failures; without that, every accuracy
   number here is indicative rather than trustworthy.
 - **The eval measures the ruleset, not the agent.** The offline provider is what
-  these numbers score. Comparing hosted and local models on the same corpus is
-  wired up and one flag away, but I have not run it at a scale worth quoting.
+  these numbers score. The agent path *has* been exercised against a live model
+  (Gemini 3.6 Flash: it classified the healthcheck sample `race_timing` at 0.95,
+  cited verbatim log lines, and independently recommended `Eventually` over the
+  fixed sleep — which is the actual bug in `samples/src`). But that is one failure,
+  not a corpus. `flakectl eval --online --provider gemini` is one command away;
+  the free tier's 5-request cap makes a 34-example run impractical, and each agent
+  turn costs a request, so a tool loop exhausts it in a single analysis.
+- **The Claude path has never made a live call.** It is exercised only against a
+  stubbed client. The loop mechanics, budget accounting, schema validation and
+  error paths are verified; prompt quality and real latency and cost are not.
 - **No issue filing or PR commenting.** Only the dry-run rendering of both. That is
   deliberate — the proposal gates auto-filing per category on the eval numbers
   justifying it, and the numbers above do not yet justify it for any category.
@@ -328,11 +351,11 @@ This is a recent proof-of-concept exploring the problem, not a finished product.
 flakectl/
   parser.py normalize.py fingerprint.py store.py detector.py rules.py
   taxonomy.py tools.py schema.py agent.py pipeline.py report.py evaluate.py
-  providers/  base.py rules_provider.py anthropic_provider.py ollama_provider.py
+  providers/  base.py rules_provider.py anthropic_provider.py gemini_provider.py ollama_provider.py
   data/       taxonomy.yaml rules.yaml     # maintainer-owned, reviewed as YAML
 samples/      6 CI logs · JUnit artifact · history.json · test sources
 eval/         labels.jsonl · run.py
-tests/        267 tests, no network, no API key
+tests/        284 tests, no network, no API key
 ```
 
 Python 3.11+. Runtime dependencies are `typer` and `PyYAML`; `anthropic` is an

@@ -16,7 +16,7 @@ from flakectl.providers.base import (
 from flakectl.providers.rules_provider import RulesProvider
 
 #: Provider names accepted by the CLI, in the order they are offered.
-PROVIDER_NAMES = ("rules", "anthropic", "ollama")
+PROVIDER_NAMES = ("rules", "anthropic", "gemini", "ollama")
 
 
 def build_provider(name: str, **kwargs: object) -> Provider:
@@ -35,6 +35,10 @@ def build_provider(name: str, **kwargs: object) -> Provider:
         from flakectl.providers.anthropic_provider import AnthropicProvider
 
         return AnthropicProvider(**kwargs)  # type: ignore[arg-type]
+    if name == "gemini":
+        from flakectl.providers.gemini_provider import GeminiProvider
+
+        return GeminiProvider(**kwargs)  # type: ignore[arg-type]
     if name == "ollama":
         from flakectl.providers.ollama_provider import OllamaProvider
 
